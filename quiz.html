@@ -8,14 +8,14 @@
 <body>
 <h2>參賽者搶答</h2>
 
-<!-- 登入工號 -->
+<!-- 登入工號區 -->
 <div id="loginDiv">
-  <label>輸入工號：</label>
+  <label>請輸入工號：</label>
   <input type="text" id="employeeIdInput">
   <button id="loginBtn">登入</button>
 </div>
 
-<!-- 搶答區 -->
+<!-- 搶答按鈕區（登入後才顯示） -->
 <div id="buzzDiv" style="display:none;">
   <button id="buzzBtn" disabled>搶答</button>
   <p>倒數剩餘: <span id="countdown">等待主辦方</span></p>
@@ -30,7 +30,7 @@ const buzzBtn = document.getElementById('buzzBtn');
 const employeeIdInput = document.getElementById('employeeIdInput');
 const countdownEl = document.getElementById('countdown');
 
-// 讀取已登入工號
+// 讀取已登入工號，如果之前登入過直接顯示搶答
 let employeeId = localStorage.getItem('employeeId');
 if(employeeId){
   loginDiv.style.display = 'none';
@@ -38,12 +38,14 @@ if(employeeId){
   employeeIdInput.value = employeeId;
 }
 
-// 登入按鈕
+// 登入按鈕事件
 loginBtn.onclick = () => {
   const val = employeeIdInput.value.trim();
   if(!val) return alert("請輸入工號");
   employeeId = val;
   localStorage.setItem('employeeId', employeeId);
+
+  // 隱藏登入畫面，顯示搶答按鈕
   loginDiv.style.display = 'none';
   buzzDiv.style.display = 'block';
 };
@@ -61,7 +63,7 @@ channel.onmessage = (e) => {
     countdownEl.textContent = data.timeLeft;
   } else if(data.action === 'enableBuzz'){
     countdownEl.textContent = "開始搶答!";
-    localStorage.setItem('buzzOpen', 'true'); // 保證手機可用
+    localStorage.setItem('buzzOpen', 'true'); // 手機可靠
   } else if(data.action === 'newQuestion'){
     countdownEl.textContent = "等待主辦方";
     buzzBtn.disabled = true;
