@@ -4,10 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>搶答系統管理</title>
+<style>
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+  th { background-color: #f2f2f2; }
+</style>
 </head>
 <body>
-<h2>誰搶答了？</h2>
-<div id="winner"></div>
+<h2>搶答紀錄</h2>
+<table>
+  <thead>
+    <tr>
+      <th>序號</th>
+      <th>工號</th>
+      <th>搶答時間</th>
+    </tr>
+  </thead>
+  <tbody id="buzzList">
+    <tr><td colspan="3">尚無人搶答</td></tr>
+  </tbody>
+</table>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -24,13 +40,21 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  const winnerEl = document.getElementById("winner");
-  db.ref("buzz").on("value", snapshot => {
+  const buzzListEl = document.getElementById("buzzList");
+
+  // 監聽搶答歷史
+  db.ref("buzzHistory").on("value", snapshot => {
     const data = snapshot.val();
+    buzzListEl.innerHTML = "";
     if (data) {
-      winnerEl.innerText = `搶答者: ${data.employeeId} (時間: ${new Date(data.timestamp).toLocaleTimeString()})`;
+      let i = 1;
+      Object.values(data).forEach(item => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${i++}</td><td>${item.employeeId}</td><td>${new Date(item.timestamp).toLocaleTimeString()}</td>`;
+        buzzListEl.appendChild(tr);
+      });
     } else {
-      winnerEl.innerText = "尚無人搶答";
+      buzzListEl.innerHTML = `<tr><td colspan="3">尚無人搶答</td></tr>`;
     }
   });
 </script>
