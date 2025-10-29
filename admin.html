@@ -1,54 +1,46 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>主辦方控制</title>
-</head>
-<body>
-<h2>倒數控制台</h2>
-<button id="startBtn">開始倒數 3 秒</button>
 <p>倒數剩餘: <span id="countdown">等待開始</span></p>
-
-<h3>搶答紀錄</h3>
+<button id="startBtn">開始倒數 3 秒</button>
 <ul id="list"><li>尚無搶答</li></ul>
 
 <script>
 const channel = new BroadcastChannel('quiz_channel');
 const startBtn = document.getElementById('startBtn');
-const listEl = document.getElementById('list');
 const countdownEl = document.getElementById('countdown');
+const listEl = document.getElementById('list');
 let firstBuzz = null;
 
 startBtn.onclick = () => {
   firstBuzz = null;
   listEl.innerHTML = '<li>尚無搶答</li>';
 
-  // 通知清空上一題
-  channel.postMessage({ action:'newQuestion' });
+  // 通知清空上一題紀錄
+  channel.postMessage({ action: 'newQuestion' });
+  localStorage.setItem('buzzOpen', 'false');  // 重置搶答狀態，手機端也會知道
 
   let timeLeft = 3;
   countdownEl.textContent = timeLeft;
 
-  const interval = setInterval(()=>{
-    countdownEl.textContent = timeLeft;      // 顯示倒數
-    channel.postMessage({ action:'countdown', timeLeft });  // 傳給參賽者
+  const interval = setInterval(() => {
+    countdownEl.textContent = timeLeft;               // 顯示主辦方倒數
+    channel.postMessage({ action: 'countdown', timeLeft }); // 傳給參賽者
+
     timeLeft--;
-    if(timeLeft < 0){
+    if (timeLeft < 0) {
       clearInterval(interval);
       countdownEl.textContent = "開始搶答!";
-      channel.postMessage({ action:'enableBuzz' });
+      channel.postMessage({ action: 'enableBuzz' }); // 開放搶答
+      localStorage.setItem('buzzOpen', 'true');      // 同步給手機端
     }
-  },1000);
+  }, 1000);
 };
 
 // 接收搶答訊息
-channel.onmessage = (e)=>{
+channel.onmessage = (e) => {
   const data = e.data;
-  if(data.action==='buzz'){
-    if(!firstBuzz){
+  if (data.action === 'buzz') {
+    if (!firstBuzz) {
       firstBuzz = data.employeeId;
-      channel.postMessage({ action:'firstPlace', employeeId:firstBuzz });
+      channel.postMessage({ action: 'firstPlace', employeeId: firstBuzz });
     }
     const li = document.createElement('li');
     li.textContent = `${data.employeeId} 搶答時間: ${data.time}`;
@@ -59,5 +51,3 @@ channel.onmessage = (e)=>{
   }
 };
 </script>
-</body>
-</html>
