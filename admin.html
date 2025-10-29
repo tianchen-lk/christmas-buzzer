@@ -3,48 +3,56 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>搶答控制台</title>
+<title>主辦方控制</title>
 </head>
 <body>
-<h2>搶答控制台</h2>
-<button id="startBtn">開始倒數</button>
-<span id="countdown">5</span> 秒
+<h2>倒數控制台</h2>
+<button id="startBtn">開始倒數 3 秒</button>
+
+<h3>搶答紀錄</h3>
+<ul id="list"><li>尚無搶答</li></ul>
 
 <script>
-const startBtn = document.getElementById('startBtn');
-const countdownEl = document.getElementById('countdown');
-
-// 建立廣播頻道
 const channel = new BroadcastChannel('quiz_channel');
+const startBtn = document.getElementById('startBtn');
+const listEl = document.getElementById('list');
+let firstBuzz = null;
 
 startBtn.onclick = () => {
-  let timeLeft = 5; // 倒數秒數
-  countdownEl.innerText = timeLeft;
+  firstBuzz = null;
+  listEl.innerHTML = '<li>尚無搶答</li>';
 
-  const interval = setInterval(() => {
+  // 通知清空上一題
+  channel.postMessage({ action:'newQuestion' });
+
+  let timeLeft = 3;
+  const interval = setInterval(()=>{
     timeLeft--;
-    countdownEl.innerText = timeLeft;
-    if (timeLeft <= 0) {
+    channel.postMessage({ action:'countdown', timeLeft });
+    if(timeLeft<=0){
       clearInterval(interval);
-      countdownEl.innerText = "開始搶答!";
-      // 通知所有參賽者開放搶答
-      channel.postMessage({ action: 'enableBuzz' });
+      channel.postMessage({ action:'enableBuzz' });
     }
-  }, 1000);
+  },1000);
 };
-</script>
-</body>
-</html>
-<h3>搶答紀錄</h3>
-<ul id="list"></ul>
-<script>
-const listEl = document.getElementById('list');
 
-channel.onmessage = (e) => {
-  if (e.data.action === 'buzz') {
+// 接收搶答訊息
+channel.onmessage = (e)=>{
+  const data = e.data;
+  if(data.action==='buzz'){
+    if(!firstBuzz){
+      firstBuzz = data.employeeId;
+      // 通知顯示頁面更新第一名
+      channel.postMessage({ action:'firstPlace', employeeId:firstBuzz });
+    }
     const li = document.createElement('li');
-    li.textContent = `${e.data.employeeId} 搶答時間: ${e.data.time}`;
+    li.textContent = `${data.employeeId} 搶答時間: ${data.time}`;
+    if(listEl.querySelector('li')?.textContent==='尚無搶答'){
+      listEl.innerHTML='';
+    }
     listEl.appendChild(li);
   }
 };
 </script>
+</body>
+</html>
