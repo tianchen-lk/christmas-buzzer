@@ -3,32 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>主辦方控制</title>
+<title>搶答控制台</title>
 </head>
 <body>
-<h2>倒數控制台</h2>
-<label>倒數秒數：</label>
-<input type="number" id="seconds" value="5">
+<h2>搶答控制台</h2>
 <button id="startBtn">開始倒數</button>
+<span id="countdown">5</span> 秒
 
 <script>
 const startBtn = document.getElementById('startBtn');
-const secondsInput = document.getElementById('seconds');
+const countdownEl = document.getElementById('countdown');
+
+// 建立廣播頻道
 const channel = new BroadcastChannel('quiz_channel');
 
 startBtn.onclick = () => {
-  let timeLeft = parseInt(secondsInput.value) || 5;
-
-  // 倒數開始前，通知清空上一題紀錄
-  channel.postMessage({ action: 'newQuestion' });
+  let timeLeft = 5; // 倒數秒數
+  countdownEl.innerText = timeLeft;
 
   const interval = setInterval(() => {
     timeLeft--;
-    // 通知參賽者更新倒數
-    channel.postMessage({ action: 'countdown', timeLeft });
-    if(timeLeft <= 0){
+    countdownEl.innerText = timeLeft;
+    if (timeLeft <= 0) {
       clearInterval(interval);
-      // 倒數結束，開放搶答
+      countdownEl.innerText = "開始搶答!";
+      // 通知所有參賽者開放搶答
       channel.postMessage({ action: 'enableBuzz' });
     }
   }, 1000);
@@ -36,3 +35,16 @@ startBtn.onclick = () => {
 </script>
 </body>
 </html>
+<h3>搶答紀錄</h3>
+<ul id="list"></ul>
+<script>
+const listEl = document.getElementById('list');
+
+channel.onmessage = (e) => {
+  if (e.data.action === 'buzz') {
+    const li = document.createElement('li');
+    li.textContent = `${e.data.employeeId} 搶答時間: ${e.data.time}`;
+    listEl.appendChild(li);
+  }
+};
+</script>
