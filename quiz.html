@@ -3,42 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>參賽者登入測試</title>
+<title>搶答頁面</title>
 </head>
 <body>
-<h2>參賽者登入測試</h2>
-
-<div id="loginDiv">
-  <label>請輸入工號：</label>
-  <input type="text" id="employeeIdInput">
-  <button id="loginBtn">登入</button>
-</div>
-
-<div id="buzzDiv" style="display:none;">
-  <p>已登入工號: <span id="employeeIdDisplay"></span></p>
-</div>
+<h2>搶答頁面</h2>
+<label>工號：</label><input type="text" id="id"><br><br>
+<button id="buzzBtn" disabled>搶答</button>
+<p>倒數剩餘: <span id="countdown">等待主辦方</span></p>
 
 <script>
-const loginBtn = document.getElementById('loginBtn');
-const employeeIdInput = document.getElementById('employeeIdInput');
-const loginDiv = document.getElementById('loginDiv');
-const buzzDiv = document.getElementById('buzzDiv');
-const employeeIdDisplay = document.getElementById('employeeIdDisplay');
+const buzzBtn = document.getElementById('buzzBtn');
+const employeeIdInput = document.getElementById('id');
+const countdownEl = document.getElementById('countdown');
+const channel = new BroadcastChannel('quiz_channel');
 
-loginBtn.addEventListener('click', () => {
-  const employeeId = employeeIdInput.value.trim();
-  if(!employeeId){
-    alert("請輸入工號");
-    return;
+// 收到主辦方訊息控制搶答
+channel.onmessage = (e) => {
+  const data = e.data;
+  if(data.action === 'countdown'){
+    countdownEl.textContent = data.timeLeft;
+  } else if(data.action === 'enableBuzz'){
+    buzzBtn.disabled = false;
+    countdownEl.textContent = "開始搶答!";
+  } else if(data.action === 'newQuestion'){
+    buzzBtn.disabled = true;
+    countdownEl.textContent = "等待主辦方";
   }
-  // 儲存工號
-  localStorage.setItem('employeeId', employeeId);
+};
 
-  // 顯示登入結果
-  loginDiv.style.display = 'none';
-  buzzDiv.style.display = 'block';
-  employeeIdDisplay.textContent = employeeId;
-});
+// 按搶答後，只發送給主辦方
+buzzBtn.onclick = () => {
+  const employeeId = employeeIdInput.value.trim();
+  if(!employeeId) return alert("請輸入工號");
+  buzzBtn.disabled = true;
+  channel.postMessage({ action: 'buzz', employeeId, time: new Date().toLocaleTimeString() });
+};
 </script>
 </body>
 </html>
