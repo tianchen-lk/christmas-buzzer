@@ -3,19 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>參賽者搶答頁面</title>
+<title>參賽者搶答</title>
 </head>
 <body>
 <h2>參賽者搶答</h2>
 
-<!-- 登入工號區 -->
+<!-- 登入工號 -->
 <div id="loginDiv">
   <label>請輸入工號：</label>
   <input type="text" id="employeeIdInput">
   <button id="loginBtn">登入</button>
 </div>
 
-<!-- 搶答按鈕區（登入後才顯示） -->
+<!-- 搶答按鈕 -->
 <div id="buzzDiv" style="display:none;">
   <button id="buzzBtn" disabled>搶答</button>
   <p>倒數剩餘: <span id="countdown">等待主辦方</span></p>
@@ -30,7 +30,7 @@ const buzzBtn = document.getElementById('buzzBtn');
 const employeeIdInput = document.getElementById('employeeIdInput');
 const countdownEl = document.getElementById('countdown');
 
-// 讀取已登入工號，如果之前登入過直接顯示搶答
+// 讀取已登入工號
 let employeeId = localStorage.getItem('employeeId');
 if(employeeId){
   loginDiv.style.display = 'none';
@@ -38,49 +38,16 @@ if(employeeId){
   employeeIdInput.value = employeeId;
 }
 
-// 登入按鈕事件
+// 登入按鈕
 loginBtn.onclick = () => {
   const val = employeeIdInput.value.trim();
   if(!val) return alert("請輸入工號");
   employeeId = val;
   localStorage.setItem('employeeId', employeeId);
 
-  // 隱藏登入畫面，顯示搶答按鈕
   loginDiv.style.display = 'none';
   buzzDiv.style.display = 'block';
 };
 
 // 手機可靠搶答：每 0.5 秒檢查 localStorage
-setInterval(() => {
-  const open = localStorage.getItem('buzzOpen') === 'true';
-  if(open) buzzBtn.disabled = false;
-}, 500);
-
-// 接收主辦方訊息
-channel.onmessage = (e) => {
-  const data = e.data;
-  if(data.action === 'countdown'){
-    countdownEl.textContent = data.timeLeft;
-  } else if(data.action === 'enableBuzz'){
-    countdownEl.textContent = "開始搶答!";
-    localStorage.setItem('buzzOpen', 'true'); // 手機可靠
-  } else if(data.action === 'newQuestion'){
-    countdownEl.textContent = "等待主辦方";
-    buzzBtn.disabled = true;
-    localStorage.setItem('buzzOpen', 'false'); // 重置
-  }
-};
-
-// 按搶答
-buzzBtn.onclick = () => {
-  if(!employeeId) return alert("請先登入工號");
-  buzzBtn.disabled = true;
-  channel.postMessage({ 
-    action:'buzz', 
-    employeeId, 
-    time:new Date().toLocaleTimeString() 
-  });
-};
-</script>
-</body>
-</html>
+setInter
