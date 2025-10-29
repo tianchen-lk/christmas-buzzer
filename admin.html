@@ -35,3 +35,17 @@ startBtn.onclick = () => {
 </script>
 </body>
 </html>
+<h3>搶答紀錄</h3>
+<ul id="list"></ul>
+<script>
+const listEl = document.getElementById('list');
+
+channel.onmessage = (e) => {
+  if (e.data.action === 'buzz') {
+    const li = document.createElement('li');
+    li.textContent = `${e.data.employeeId} 搶答時間: ${e.data.time}`;
+    listEl.appendChild(li);
+  }
+};
+</script>
+
