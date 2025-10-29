@@ -6,10 +6,11 @@
 <title>搶答大螢幕顯示</title>
 <style>
   body { display:flex; justify-content:center; align-items:center; height:100vh; font-size:100px; }
+  #firstPlace { text-align:center; }
 </style>
 </head>
 <body>
-<div id="firstPlace">等待第一名...</div>
+<div id="firstPlace">等待倒數...</div>
 
 <script>
 const displayEl = document.getElementById('firstPlace');
@@ -17,10 +18,14 @@ const channel = new BroadcastChannel('quiz_channel');
 
 channel.onmessage = (e)=>{
   const data = e.data;
-  if(data.action==='firstPlace'){
-    displayEl.textContent = data.employeeId;
+  if(data.action==='countdown'){
+    displayEl.textContent = data.timeLeft;  // 顯示倒數秒數
+  } else if(data.action==='enableBuzz'){
+    displayEl.textContent = "開始搶答!";
+  } else if(data.action==='firstPlace'){
+    displayEl.textContent = data.employeeId;  // 顯示第一名
   } else if(data.action==='newQuestion'){
-    displayEl.textContent = '等待第一名...';
+    displayEl.textContent = '等待倒數...';
   }
 };
 </script>
