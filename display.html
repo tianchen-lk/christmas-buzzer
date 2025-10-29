@@ -5,29 +5,73 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>搶答大螢幕顯示</title>
 <style>
-  body { display:flex; justify-content:center; align-items:center; height:100vh; font-size:100px; }
-  #firstPlace { text-align:center; }
+  body { display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; font-size:50px; text-align:center; }
+  #firstPlace { margin-top:50px; font-size:80px; color:red; }
+  #buzzContainer { margin-top:30px; }
+  input, button { font-size:40px; padding:10px; }
 </style>
 </head>
 <body>
-<div id="firstPlace">等待倒數...</div>
 
-<script>
-const displayEl = document.getElementById('firstPlace');
-const channel = new BroadcastChannel('quiz_channel');
+<div id="countdownDisplay">等待倒數...</div>
 
-channel.onmessage = (e)=>{
-  const data = e.data;
-  if(data.action==='countdown'){
-    displayEl.textContent = data.timeLeft;  // 顯示倒數秒數
-  } else if(data.action==='enableBuzz'){
-    displayEl.textContent = "開始搶答!";
-  } else if(data.action==='firstPlace'){
-    displayEl.textContent = data.employeeId;  // 顯示第一名
-  } else if(data.action==='newQuestion'){
-    displayEl.textContent = '等待倒數...';
-  }
+<div id="buzzContainer">
+  <label>電話號碼：</label>
+  <input type="text" id="phoneNumber">
+  <button id="buzzBtn">搶答</button>
+</div>
+
+<div id="firstPlace">第一名：---</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.2.0/firebase-app.js";
+import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.2.0/firebase-database.js";
+
+// ===== 1️⃣ Firebase 設定 =====
+const firebaseConfig = {
+  apiKey: "你的APIKey",
+  authDomain: "你的專案ID.firebaseapp.com",
+  databaseURL: "https://你的專案ID-default-rtdb.firebaseio.com",
+  projectId: "你的專案ID",
+  storageBucket: "你的專案ID.appspot.com",
+  messagingSenderId: "xxxx",
+  appId: "xxxx"
 };
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// ===== 2️⃣ DOM 元素 =====
+const countdownDisplay = document.getElementById('countdownDisplay');
+const firstPlaceDisplay = document.getElementById('firstPlace');
+const buzzBtn = document.getElementById('buzzBtn');
+const phoneInput = document.getElementById('phoneNumber');
+
+// ===== 3️⃣ 按搶答 =====
+buzzBtn.onclick = () => {
+  const phone = phoneInput.value.trim();
+  if(!phone) return alert("請輸入電話號碼");
+  buzzBtn.disabled = true;
+  push(ref(db, 'buzzes'), {
+    phoneNumber: phone,
+    time: new Date().toISOString()
+  });
+};
+
+// ===== 4️⃣ 顯示倒數（主辦方可在 Firebase 修改 countdown 節點） =====
+onValue(ref(db, 'countdown'), (snapshot) => {
+  const value = snapshot.val();
+  countdownDisplay.textContent = value || "等待倒數...";
+});
+
+// ===== 5️⃣ 顯示第一名 =====
+onValue(ref(db, 'buzzes'), (snapshot) => {
+  const data = snapshot.val();
+  if(!data) return;
+  // 取最早搶答的電話
+  const firstEntry = Object.values(data).sort((a,b) => new Date(a.time) - new Date(b.time))[0];
+  firstPlaceDisplay.textContent = "第一名：" + firstEntry.phoneNumber;
+});
 </script>
 </body>
 </html>
