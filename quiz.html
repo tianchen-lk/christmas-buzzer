@@ -1,9 +1,37 @@
-function buzz() {
-  const timestamp = Date.now();
-  // 寫入最新搶答
-  db.ref("buzz").set({ employeeId, timestamp });
-  // 寫入歷史
-  db.ref("buzzHistory").push({ employeeId, timestamp });
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>搶答頁面</title>
+</head>
+<body>
+<h2>搶答頁面</h2>
+<label>工號：</label><input type="text" id="id">
+<button id="buzzBtn" disabled>搶答</button>
+
+<script>
+const buzzBtn = document.getElementById('buzzBtn');
+const employeeIdInput = document.getElementById('id');
+
+// 建立廣播頻道
+const channel = new BroadcastChannel('quiz_channel');
+
+// 收到主辦方訊息
+channel.onmessage = (e) => {
+  if (e.data.action === 'enableBuzz') {
+    buzzBtn.disabled = false;
+    alert("可以搶答了!");
+  }
+};
+
+buzzBtn.onclick = () => {
+  const employeeId = employeeIdInput.value.trim();
+  if (!employeeId) return alert("請輸入工號");
   buzzBtn.disabled = true;
-  alert("已搶答");
-}
+  // 通知主辦方有人搶答
+  channel.postMessage({ action: 'buzz', employeeId, time: new Date().toLocaleTimeString() });
+};
+</script>
+</body>
+</html>
