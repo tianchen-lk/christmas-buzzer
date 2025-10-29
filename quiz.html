@@ -1,59 +1,9 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>搶答系統</title>
-</head>
-<body>
-<h2>倒數計時: <span id="countdown">5</span> 秒</h2>
-<button id="buzzBtn" onclick="buzz()" disabled>搶答</button>
-
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script>
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-
-  const employeeId = localStorage.getItem("employeeId");
-  if (!employeeId) {
-    alert("未登入");
-    window.location.href = "index.html";
-  }
-
-  const countdownEl = document.getElementById("countdown");
-  const buzzBtn = document.getElementById("buzzBtn");
-
-  let timeLeft = 5; // 倒數秒數
-  let interval = setInterval(() => {
-    countdownEl.innerText = timeLeft;
-    if (timeLeft <= 0) {
-      clearInterval(interval);
-      buzzBtn.disabled = true;
-      countdownEl.innerText = "時間到!";
-    } else {
-      buzzBtn.disabled = false;
-    }
-    timeLeft--;
-  }, 1000);
-
-  function buzz() {
-    db.ref("buzz").set({
-      employeeId: employeeId,
-      timestamp: Date.now()
-    });
-    buzzBtn.disabled = true;
-    alert("已搶答");
-  }
-</script>
-</body>
-</html>
+function buzz() {
+  const timestamp = Date.now();
+  // 寫入最新搶答
+  db.ref("buzz").set({ employeeId, timestamp });
+  // 寫入歷史
+  db.ref("buzzHistory").push({ employeeId, timestamp });
+  buzzBtn.disabled = true;
+  alert("已搶答");
+}
