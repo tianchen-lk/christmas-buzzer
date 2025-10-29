@@ -8,6 +8,7 @@
 <body>
 <h2>倒數控制台</h2>
 <button id="startBtn">開始倒數 3 秒</button>
+<p>倒數剩餘: <span id="countdown">等待開始</span></p>
 
 <h3>搶答紀錄</h3>
 <ul id="list"><li>尚無搶答</li></ul>
@@ -16,6 +17,7 @@
 const channel = new BroadcastChannel('quiz_channel');
 const startBtn = document.getElementById('startBtn');
 const listEl = document.getElementById('list');
+const countdownEl = document.getElementById('countdown');
 let firstBuzz = null;
 
 startBtn.onclick = () => {
@@ -26,11 +28,15 @@ startBtn.onclick = () => {
   channel.postMessage({ action:'newQuestion' });
 
   let timeLeft = 3;
+  countdownEl.textContent = timeLeft;
+
   const interval = setInterval(()=>{
+    countdownEl.textContent = timeLeft;      // 顯示倒數
+    channel.postMessage({ action:'countdown', timeLeft });  // 傳給參賽者
     timeLeft--;
-    channel.postMessage({ action:'countdown', timeLeft });
-    if(timeLeft<=0){
+    if(timeLeft < 0){
       clearInterval(interval);
+      countdownEl.textContent = "開始搶答!";
       channel.postMessage({ action:'enableBuzz' });
     }
   },1000);
@@ -42,7 +48,6 @@ channel.onmessage = (e)=>{
   if(data.action==='buzz'){
     if(!firstBuzz){
       firstBuzz = data.employeeId;
-      // 通知顯示頁面更新第一名
       channel.postMessage({ action:'firstPlace', employeeId:firstBuzz });
     }
     const li = document.createElement('li');
