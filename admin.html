@@ -3,60 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>搶答系統管理</title>
-<style>
-  table { border-collapse: collapse; width: 100%; }
-  th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-  th { background-color: #f2f2f2; }
-</style>
+<title>搶答控制台</title>
 </head>
 <body>
-<h2>搶答紀錄</h2>
-<table>
-  <thead>
-    <tr>
-      <th>序號</th>
-      <th>工號</th>
-      <th>搶答時間</th>
-    </tr>
-  </thead>
-  <tbody id="buzzList">
-    <tr><td colspan="3">尚無人搶答</td></tr>
-  </tbody>
-</table>
+<h2>搶答控制台</h2>
+<button id="startBtn">開始倒數</button>
+<span id="countdown">5</span> 秒
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+const startBtn = document.getElementById('startBtn');
+const countdownEl = document.getElementById('countdown');
 
-  const buzzListEl = document.getElementById("buzzList");
+// 建立廣播頻道
+const channel = new BroadcastChannel('quiz_channel');
 
-  // 監聽搶答歷史
-  db.ref("buzzHistory").on("value", snapshot => {
-    const data = snapshot.val();
-    buzzListEl.innerHTML = "";
-    if (data) {
-      let i = 1;
-      Object.values(data).forEach(item => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${i++}</td><td>${item.employeeId}</td><td>${new Date(item.timestamp).toLocaleTimeString()}</td>`;
-        buzzListEl.appendChild(tr);
-      });
-    } else {
-      buzzListEl.innerHTML = `<tr><td colspan="3">尚無人搶答</td></tr>`;
+startBtn.onclick = () => {
+  let timeLeft = 5; // 倒數秒數
+  countdownEl.innerText = timeLeft;
+
+  const interval = setInterval(() => {
+    timeLeft--;
+    countdownEl.innerText = timeLeft;
+    if (timeLeft <= 0) {
+      clearInterval(interval);
+      countdownEl.innerText = "開始搶答!";
+      // 通知所有參賽者開放搶答
+      channel.postMessage({ action: 'enableBuzz' });
     }
-  });
+  }, 1000);
+};
 </script>
 </body>
 </html>
