@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>搶答系統管理</title>
+</head>
+<body>
+<h2>誰搶答了？</h2>
+<div id="winner"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  const winnerEl = document.getElementById("winner");
+  db.ref("buzz").on("value", snapshot => {
+    const data = snapshot.val();
+    if (data) {
+      winnerEl.innerText = `搶答者: ${data.employeeId} (時間: ${new Date(data.timestamp).toLocaleTimeString()})`;
+    } else {
+      winnerEl.innerText = "尚無人搶答";
+    }
+  });
+</script>
+</body>
+</html>
