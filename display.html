@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>搶答大螢幕顯示</title>
+<style>
+  body { display:flex; justify-content:center; align-items:center; height:100vh; font-size:100px; }
+</style>
+</head>
+<body>
+<div id="firstPlace">等待第一名...</div>
+
+<script>
+const displayEl = document.getElementById('firstPlace');
+const channel = new BroadcastChannel('quiz_channel');
+
+channel.onmessage = (e)=>{
+  const data = e.data;
+  if(data.action==='firstPlace'){
+    displayEl.textContent = data.employeeId;
+  } else if(data.action==='newQuestion'){
+    displayEl.textContent = '等待第一名...';
+  }
+};
+</script>
+</body>
+</html>
