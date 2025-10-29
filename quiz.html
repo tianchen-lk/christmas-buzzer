@@ -1,69 +1,38 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>參賽者搶答</title>
-</head>
-<body>
-<h2>搶答頁面</h2>
-<div id="loginDiv">
-  <label>輸入工號：</label>
-  <input type="text" id="employeeId">
-  <button id="loginBtn">登入</button>
-</div>
-
+<!-- 原本的搶答按鈕區 -->
 <div id="buzzDiv" style="display:none;">
   <button id="buzzBtn" disabled>搶答</button>
   <p>倒數剩餘: <span id="countdown">等待主辦方</span></p>
 </div>
 
 <script>
+const buzzBtn = document.getElementById('buzzBtn');
+const countdownEl = document.getElementById('countdown');
 const channel = new BroadcastChannel('quiz_channel');
 
-const loginDiv = document.getElementById('loginDiv');
-const buzzDiv = document.getElementById('buzzDiv');
-const loginBtn = document.getElementById('loginBtn');
-const buzzBtn = document.getElementById('buzzBtn');
-const employeeIdInput = document.getElementById('employeeId');
-const countdownEl = document.getElementById('countdown');
+// 每 0.5 秒檢查 localStorage 是否開放搶答
+setInterval(() => {
+  const open = localStorage.getItem('buzzOpen') === 'true';
+  if(open) buzzBtn.disabled = false;
+}, 500);
 
-let employeeId = localStorage.getItem('employeeId');
-
-if(employeeId){
-  loginDiv.style.display = 'none';
-  buzzDiv.style.display = 'block';
-}else{
-  loginBtn.onclick = () => {
-    const val = employeeIdInput.value.trim();
-    if(!val) return alert("請輸入工號");
-    employeeId = val;
-    localStorage.setItem('employeeId', employeeId);
-    loginDiv.style.display = 'none';
-    buzzDiv.style.display = 'block';
-  };
-}
-
-// 接收倒數與開放搶答訊息
+// 接收倒數訊息更新畫面（仍保留 BroadcastChannel）
 channel.onmessage = (e) => {
   const data = e.data;
   if(data.action === 'countdown'){
     countdownEl.textContent = data.timeLeft;
   } else if(data.action === 'enableBuzz'){
-    buzzBtn.disabled = false;
     countdownEl.textContent = "開始搶答!";
+    localStorage.setItem('buzzOpen', 'true');  // 同步給手機
   } else if(data.action === 'newQuestion'){
-    buzzBtn.disabled = true;
     countdownEl.textContent = "等待主辦方";
+    buzzBtn.disabled = true;
+    localStorage.setItem('buzzOpen', 'false');  // 重置
   }
 };
 
 // 按搶答
 buzzBtn.onclick = () => {
-  if(!employeeId) return alert("工號錯誤");
+  const employeeId = localStorage.getItem('employeeId');
+  if(!employeeId) return alert("請先登入工號");
   buzzBtn.disabled = true;
-  channel.postMessage({ action:'buzz', employeeId, time:new Date().toLocaleTimeString() });
-};
-</script>
-</body>
-</html>
+  channel.postMessage
