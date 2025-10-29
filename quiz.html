@@ -3,42 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>參賽者搶答</title>
+<title>參賽者登入測試</title>
 </head>
 <body>
-<h2>參賽者搶答系統</h2>
+<h2>參賽者登入測試</h2>
 
-<!-- 登入工號區 -->
 <div id="loginDiv">
   <label>請輸入工號：</label>
   <input type="text" id="employeeIdInput">
   <button id="loginBtn">登入</button>
 </div>
 
-<!-- 搶答區（登入後顯示） -->
 <div id="buzzDiv" style="display:none;">
-  <button id="buzzBtn" disabled>搶答</button>
-  <p>倒數剩餘: <span id="countdown">等待主辦方</span></p>
+  <p>已登入工號: <span id="employeeIdDisplay"></span></p>
 </div>
 
 <script>
-const channel = new BroadcastChannel('quiz_channel');
-
-const loginDiv = document.getElementById('loginDiv');
-const buzzDiv = document.getElementById('buzzDiv');
 const loginBtn = document.getElementById('loginBtn');
 const employeeIdInput = document.getElementById('employeeIdInput');
-const buzzBtn = document.getElementById('buzzBtn');
-const countdownEl = document.getElementById('countdown');
+const loginDiv = document.getElementById('loginDiv');
+const buzzDiv = document.getElementById('buzzDiv');
+const employeeIdDisplay = document.getElementById('employeeIdDisplay');
 
-// 讀取已登入工號
-let employeeId = localStorage.getItem('employeeId');
-if(employeeId){
+loginBtn.addEventListener('click', () => {
+  const employeeId = employeeIdInput.value.trim();
+  if(!employeeId){
+    alert("請輸入工號");
+    return;
+  }
+  // 儲存工號
+  localStorage.setItem('employeeId', employeeId);
+
+  // 顯示登入結果
   loginDiv.style.display = 'none';
   buzzDiv.style.display = 'block';
-  employeeIdInput.value = employeeId;
-}
-
-// 登入事件
-loginBtn.addEventListener('click', () => {
-  const val = employe
+  employeeIdDisplay.textContent = employeeId;
+});
+</script>
+</body>
+</html>
