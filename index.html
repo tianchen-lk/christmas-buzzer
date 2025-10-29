@@ -1,27 +1,38 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎅 聖誕搶答活動 🎄</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>搶答系統登入</title>
 </head>
 <body>
-  <div id="app" class="container">
-    <h1>🎄 聖誕搶答活動 🎁</h1>
-    <p>請輸入工號開始搶答：</p>
-    <input id="empId" placeholder="輸入工號" />
-    <button id="startBtn">開始搶答倒數</button>
+<h2>搶答系統登入</h2>
+<label>工號：</label>
+<input type="text" id="employeeId" placeholder="輸入工號">
+<button onclick="login()">登入</button>
 
-    <div id="countdown" class="hidden">
-      <h2>倒數：<span id="timer">5</span></h2>
-    </div>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+  // 🔑 這裡放你的 Firebase config
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-    <div id="result" class="hidden">
-      <h2>🎉 搶答成功！</h2>
-    </div>
-  </div>
-
-  <script src="script.js"></script>
+  function login() {
+    const id = document.getElementById("employeeId").value.trim();
+    if (!id) return alert("請輸入工號");
+    localStorage.setItem("employeeId", id);
+    window.location.href = "quiz.html";
+  }
+</script>
 </body>
 </html>
