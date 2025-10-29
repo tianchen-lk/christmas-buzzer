@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎅 聖誕搶答活動 🎄</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app" class="container">
+    <h1>🎄 聖誕搶答活動 🎁</h1>
+    <p>請輸入工號開始搶答：</p>
+    <input id="empId" placeholder="輸入工號" />
+    <button id="startBtn">開始搶答倒數</button>
+
+    <div id="countdown" class="hidden">
+      <h2>倒數：<span id="timer">5</span></h2>
+    </div>
+
+    <div id="result" class="hidden">
+      <h2>🎉 搶答成功！</h2>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
