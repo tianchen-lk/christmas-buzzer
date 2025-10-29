@@ -6,16 +6,16 @@
 <title>參賽者搶答</title>
 </head>
 <body>
-<h2>參賽者搶答</h2>
+<h2>參賽者搶答系統</h2>
 
-<!-- 登入工號 -->
+<!-- 登入工號區 -->
 <div id="loginDiv">
   <label>請輸入工號：</label>
   <input type="text" id="employeeIdInput">
   <button id="loginBtn">登入</button>
 </div>
 
-<!-- 搶答按鈕 -->
+<!-- 搶答區（登入後顯示） -->
 <div id="buzzDiv" style="display:none;">
   <button id="buzzBtn" disabled>搶答</button>
   <p>倒數剩餘: <span id="countdown">等待主辦方</span></p>
@@ -23,11 +23,12 @@
 
 <script>
 const channel = new BroadcastChannel('quiz_channel');
+
 const loginDiv = document.getElementById('loginDiv');
 const buzzDiv = document.getElementById('buzzDiv');
 const loginBtn = document.getElementById('loginBtn');
-const buzzBtn = document.getElementById('buzzBtn');
 const employeeIdInput = document.getElementById('employeeIdInput');
+const buzzBtn = document.getElementById('buzzBtn');
 const countdownEl = document.getElementById('countdown');
 
 // 讀取已登入工號
@@ -38,16 +39,6 @@ if(employeeId){
   employeeIdInput.value = employeeId;
 }
 
-// 登入按鈕
-loginBtn.onclick = () => {
-  const val = employeeIdInput.value.trim();
-  if(!val) return alert("請輸入工號");
-  employeeId = val;
-  localStorage.setItem('employeeId', employeeId);
-
-  loginDiv.style.display = 'none';
-  buzzDiv.style.display = 'block';
-};
-
-// 手機可靠搶答：每 0.5 秒檢查 localStorage
-setInter
+// 登入事件
+loginBtn.addEventListener('click', () => {
+  const val = employe
